@@ -446,6 +446,10 @@ app.get('/api/user/:userId', (req, res) => {
 });
 
 // Serve SPA
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'sitemap.xml'));
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
