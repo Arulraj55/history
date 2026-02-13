@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#030712">
+  <meta name="description" content="Learn history through animations, videos and AI-powered quizzes">
+  <title>History Hub - Learn History Through Stories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ==================== LOGIN PAGE ==================== -->
+    <div id="page-login" class="page active">
+      <div class="auth-container">
+        <div class="auth-header">
+          <div class="logo-icon">
+            <i class="fas fa-landmark"></i>
+          </div>
+          <h1>History Hub</h1>
+          <p class="subtitle">Learn History Through Stories & Animations</p>
+        </div>
+        <form id="login-form" class="auth-form">
+          <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="login-username" placeholder="Username" required autocomplete="username">
+          </div>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">
+            <span>Log In</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <div id="login-error" class="error-msg hidden"></div>
+        </form>
+        <p class="auth-switch">Don't have an account? <a href="#" id="goto-signup">Sign Up</a></p>
+      </div>
+    </div>
+
+    <!-- ==================== SIGNUP PAGE ==================== -->
+    <div id="page-signup" class="page">
+      <div class="auth-container">
+        <div class="auth-header">
+          <div class="logo-icon">
+            <i class="fas fa-landmark"></i>
+          </div>
+          <h1>Create Account</h1>
+          <p class="subtitle">Join & start your history journey</p>
+        </div>
+        <form id="signup-form" class="auth-form">
+          <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="signup-username" placeholder="Choose a username" required>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-graduation-cap"></i>
+            <select id="signup-class" required>
+              <option value="">Select your class</option>
+              <option value="6">Class 6</option>
+              <option value="7">Class 7</option>
+              <option value="8">Class 8</option>
+              <option value="9">Class 9</option>
+              <option value="10">Class 10</option>
+              <option value="11">Class 11</option>
+              <option value="12">Class 12</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="signup-password" placeholder="Create password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">
+            <span>Sign Up</span>
+            <i class="fas fa-user-plus"></i>
+          </button>
+          <div id="signup-error" class="error-msg hidden"></div>
+          <div id="signup-success" class="success-msg hidden"></div>
+        </form>
+        <p class="auth-switch">Already have an account? <a href="#" id="goto-login">Log In</a></p>
+      </div>
+    </div>
+
+    <!-- ==================== HOME PAGE ==================== -->
+    <div id="page-home" class="page">
+      <header class="app-header">
+        <div class="header-left">
+          <div class="avatar" id="user-avatar">S</div>
+          <div>
+            <h2 class="header-title" id="welcome-text">Hi, Student!</h2>
+            <span class="header-sub" id="user-class-display">Class 10</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="icon-btn" id="btn-history" title="Quiz History">
+            <i class="fas fa-clock-rotate-left"></i>
+          </button>
+          <button class="icon-btn" id="btn-logout" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Syllabus Selection -->
+      <div id="syllabus-selection" class="section">
+        <h3 class="section-title"><i class="fas fa-graduation-cap" style="margin-right:8px;color:var(--primary-light)"></i>Choose Your Syllabus</h3>
+        <div class="syllabus-cards">
+          <div class="syllabus-card" data-syllabus="cbse">
+            <div class="syllabus-icon cbse-icon">
+              <i class="fas fa-book-open"></i>
+            </div>
+            <h4>CBSE</h4>
+            <p>Year-wise chapters</p>
+          </div>
+          <div class="syllabus-card" data-syllabus="samacheer">
+            <div class="syllabus-icon samacheer-icon">
+              <i class="fas fa-book"></i>
+            </div>
+            <h4>Samacheer Kalvi</h4>
+            <p>Term-wise chapters</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Term Selection (Samacheer Only) -->
+      <div id="term-selection" class="section hidden">
+        <div class="section-header-row">
+          <button class="back-btn" id="back-to-syllabus">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h3 class="section-title">Select Term</h3>
+        </div>
+        <div class="term-cards">
+          <div class="term-card" data-term="term1">
+            <div class="term-number">1</div>
+            <span>Term 1</span>
+          </div>
+          <div class="term-card" data-term="term2">
+            <div class="term-number">2</div>
+            <span>Term 2</span>
+          </div>
+          <div class="term-card" data-term="term3">
+            <div class="term-number">3</div>
+            <span>Term 3</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter List -->
+      <div id="chapter-list" class="section hidden">
+        <div class="section-header-row">
+          <button class="back-btn" id="back-to-terms">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h3 class="section-title" id="chapters-title">Chapters</h3>
+        </div>
+        <div id="chapters-container" class="chapters-grid"></div>
+      </div>
+    </div>
+
+    <!-- ==================== VIDEO PAGE ==================== -->
+    <div id="page-videos" class="page">
+      <header class="page-header">
+        <button class="back-btn" id="back-to-chapters">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2 id="video-chapter-title">Chapter Videos</h2>
+      </header>
+      <div class="video-section">
+        <div class="video-info-banner">
+          <i class="fas fa-play-circle"></i>
+          <span>Watch chapter animation videos to learn before quiz</span>
+        </div>
+        <div id="videos-container" class="videos-container">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Finding best videos for you...</p>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-start-quiz" disabled>
+          <i class="fas fa-pen-to-square"></i>
+          <span>Take Quiz Now</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== QUIZ PAGE ==================== -->
+    <div id="page-quiz" class="page">
+      <header class="page-header">
+        <h2 id="quiz-chapter-title">Quiz</h2>
+        <div class="quiz-progress">
+          <span id="quiz-progress-text">1 / 10</span>
+        </div>
+      </header>
+      <div id="quiz-loading" class="quiz-loading">
+        <div class="spinner"></div>
+        <p>Generating quiz questions...</p>
+        <p class="loading-sub">Preparing your quiz</p>
+      </div>
+      <div id="quiz-container" class="quiz-container hidden">
+        <div class="progress-bar">
+          <div class="progress-fill" id="quiz-progress-bar"></div>
+        </div>
+        <div id="quiz-question-area"></div>
+        <div class="quiz-actions">
+          <button class="btn btn-outline" id="btn-prev-question" disabled>
+            <i class="fas fa-chevron-left"></i> Previous
+          </button>
+          <button class="btn btn-primary" id="btn-next-question">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+          <button class="btn btn-success hidden" id="btn-submit-quiz">
+            <i class="fas fa-check"></i> Submit Quiz
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== RESULT PAGE ==================== -->
+    <div id="page-result" class="page">
+      <div class="result-container">
+        <div class="result-header">
+          <div class="result-circle" id="result-circle">
+            <span class="result-score" id="result-score">0</span>
+            <span class="result-total">/ 10</span>
+          </div>
+          <h2 id="result-message">Great Job!</h2>
+          <p id="result-chapter-name" class="result-chapter"></p>
+        </div>
+        <div class="result-stats">
+          <div class="stat-card correct">
+            <i class="fas fa-check-circle"></i>
+            <span id="stat-correct">0</span>
+            <label>Correct</label>
+          </div>
+          <div class="stat-card wrong">
+            <i class="fas fa-times-circle"></i>
+            <span id="stat-wrong">0</span>
+            <label>Wrong</label>
+          </div>
+          <div class="stat-card percentage">
+            <i class="fas fa-percentage"></i>
+            <span id="stat-percentage">0%</span>
+            <label>Score</label>
+          </div>
+        </div>
+        <div class="result-review">
+          <h3>Review Answers</h3>
+          <div id="review-container"></div>
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-back-home" type="button">
+          <i class="fas fa-home"></i>
+          <span>Back to Home</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== QUIZ HISTORY PAGE ==================== -->
+    <div id="page-history" class="page">
+      <header class="page-header">
+        <button class="back-btn" id="back-from-history">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2>Quiz History</h2>
+      </header>
+      <div class="history-section">
+        <div class="history-stats-bar" id="history-stats-bar">
+          <div class="hist-stat">
+            <span class="hist-stat-value" id="hist-total-quizzes">0</span>
+            <span class="hist-stat-label">Quizzes</span>
+          </div>
+          <div class="hist-stat">
+            <span class="hist-stat-value" id="hist-total-chapters">0</span>
+            <span class="hist-stat-label">Chapters</span>
+          </div>
+          <div class="hist-stat">
+            <span class="hist-stat-value" id="hist-avg-score">0%</span>
+            <span class="hist-stat-label">Avg Score</span>
+          </div>
+        </div>
+        <div id="history-container" class="history-list"></div>
+        <div id="history-empty" class="empty-state hidden">
+          <i class="fas fa-book-open"></i>
+          <h3>No quizzes yet</h3>
+          <p>Start learning chapters and take quizzes to see your progress here!</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="app-footer">
+    <p>Build strong programming and DSA skills with simple practice and real coding tasks.</p>
+    <a href="https://pses.onrender.com/" target="_blank" rel="noopener noreferrer">
+      <i class="fas fa-code" style="margin-right:4px"></i> pses.onrender.com
+    </a>
+  </footer>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

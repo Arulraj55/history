@@ -1,0 +1,681 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "arul",
+      "class": "6",
+      "password": "$2a$10$DCWNOehDiL4Spc1BK2YaNuz/OUfV1.la4BwmfjIzbaJhrrpBQv4.C",
+      "syllabus": "cbse",
+      "created_at": "2026-02-13T05:36:25.982Z"
+    }
+  ],
+  "quizHistory": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "chapter_name": "South Indian Kingdoms",
+      "chapter_number": 12,
+      "syllabus": "samacheer",
+      "term": "term3",
+      "score": 3,
+      "total": 10,
+      "questions": [
+        {
+          "question": "What is the main theme of the chapter \"South Indian Kingdoms\"?",
+          "options": [
+            "Political events",
+            "Historical developments and their impact",
+            "Only geography",
+            "Only economics"
+          ],
+          "userAnswer": 0,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "Which skill is most important while studying class 6 history chapters?",
+          "options": [
+            "Memorizing without understanding",
+            "Connecting causes and effects",
+            "Ignoring timelines",
+            "Skipping maps"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "In \"South Indian Kingdoms\", why are timelines useful?",
+          "options": [
+            "They decorate pages",
+            "They show event order clearly",
+            "They replace textbooks",
+            "They are only for exams"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "Which source is generally considered a primary historical source?",
+          "options": [
+            "A modern blog post",
+            "A recent movie review",
+            "An inscription from that period",
+            "A random social post"
+          ],
+          "userAnswer": 3,
+          "correctAnswer": 2,
+          "isCorrect": false
+        },
+        {
+          "question": "A major reason historians compare multiple sources is to:",
+          "options": [
+            "Finish homework quickly",
+            "Avoid all interpretation",
+            "Cross-check reliability",
+            "Ignore bias"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 2,
+          "isCorrect": false
+        },
+        {
+          "question": "When learning \"South Indian Kingdoms\", what helps best with long-term memory?",
+          "options": [
+            "Active recall and quizzes",
+            "Reading once only",
+            "Skipping revision",
+            "Avoiding questions"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which is the best example of cause-and-effect in history?",
+          "options": [
+            "Random facts with no links",
+            "Event leading to social or political change",
+            "Only names and dates",
+            "Colorful textbook covers"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "How should a student verify a historical claim?",
+          "options": [
+            "Trust one source only",
+            "Check textbook, sources, and evidence",
+            "Use rumors",
+            "Ignore context"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "What is one expected outcome after studying \"South Indian Kingdoms\"?",
+          "options": [
+            "Understanding historical context",
+            "Avoiding all discussion",
+            "Memorizing unrelated formulas",
+            "Ignoring chapter terms"
+          ],
+          "userAnswer": 0,
+          "correctAnswer": 0,
+          "isCorrect": true
+        },
+        {
+          "question": "Which approach is most appropriate for school-level history learning?",
+          "options": [
+            "Balanced understanding of facts and concepts",
+            "Only difficult research papers",
+            "No examples",
+            "No revision"
+          ],
+          "userAnswer": 3,
+          "correctAnswer": 0,
+          "isCorrect": false
+        }
+      ],
+      "created_at": "2026-02-13T05:59:11.922Z"
+    },
+    {
+      "id": 2,
+      "user_id": 1,
+      "chapter_name": "Buddhism and Jainism",
+      "chapter_number": 6,
+      "syllabus": "samacheer",
+      "term": "term2",
+      "score": 4,
+      "total": 10,
+      "questions": [
+        {
+          "question": "What is the main theme of the chapter \"Buddhism and Jainism\"?",
+          "options": [
+            "Political events",
+            "Historical developments and their impact",
+            "Only geography",
+            "Only economics"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which skill is most important while studying class 6 history chapters?",
+          "options": [
+            "Memorizing without understanding",
+            "Connecting causes and effects",
+            "Ignoring timelines",
+            "Skipping maps"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "In \"Buddhism and Jainism\", why are timelines useful?",
+          "options": [
+            "They decorate pages",
+            "They show event order clearly",
+            "They replace textbooks",
+            "They are only for exams"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which source is generally considered a primary historical source?",
+          "options": [
+            "A modern blog post",
+            "A recent movie review",
+            "An inscription from that period",
+            "A random social post"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 2,
+          "isCorrect": true
+        },
+        {
+          "question": "A major reason historians compare multiple sources is to:",
+          "options": [
+            "Finish homework quickly",
+            "Avoid all interpretation",
+            "Cross-check reliability",
+            "Ignore bias"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 2,
+          "isCorrect": false
+        },
+        {
+          "question": "When learning \"Buddhism and Jainism\", what helps best with long-term memory?",
+          "options": [
+            "Active recall and quizzes",
+            "Reading once only",
+            "Skipping revision",
+            "Avoiding questions"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which is the best example of cause-and-effect in history?",
+          "options": [
+            "Random facts with no links",
+            "Event leading to social or political change",
+            "Only names and dates",
+            "Colorful textbook covers"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "How should a student verify a historical claim?",
+          "options": [
+            "Trust one source only",
+            "Check textbook, sources, and evidence",
+            "Use rumors",
+            "Ignore context"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "What is one expected outcome after studying \"Buddhism and Jainism\"?",
+          "options": [
+            "Understanding historical context",
+            "Avoiding all discussion",
+            "Memorizing unrelated formulas",
+            "Ignoring chapter terms"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which approach is most appropriate for school-level history learning?",
+          "options": [
+            "Balanced understanding of facts and concepts",
+            "Only difficult research papers",
+            "No examples",
+            "No revision"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        }
+      ],
+      "created_at": "2026-02-13T06:03:44.513Z"
+    },
+    {
+      "id": 3,
+      "user_id": 1,
+      "chapter_name": "Ancient Cities of Mesopotamia",
+      "chapter_number": 4,
+      "syllabus": "samacheer",
+      "term": "term1",
+      "score": 4,
+      "total": 10,
+      "questions": [
+        {
+          "question": "What is the main theme of the chapter \"Ancient Cities of Mesopotamia\"?",
+          "options": [
+            "Political events",
+            "Historical developments and their impact",
+            "Only geography",
+            "Only economics"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which skill is most important while studying class 6 history chapters?",
+          "options": [
+            "Memorizing without understanding",
+            "Connecting causes and effects",
+            "Ignoring timelines",
+            "Skipping maps"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "In \"Ancient Cities of Mesopotamia\", why are timelines useful?",
+          "options": [
+            "They decorate pages",
+            "They show event order clearly",
+            "They replace textbooks",
+            "They are only for exams"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which source is generally considered a primary historical source?",
+          "options": [
+            "A modern blog post",
+            "A recent movie review",
+            "An inscription from that period",
+            "A random social post"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 2,
+          "isCorrect": true
+        },
+        {
+          "question": "A major reason historians compare multiple sources is to:",
+          "options": [
+            "Finish homework quickly",
+            "Avoid all interpretation",
+            "Cross-check reliability",
+            "Ignore bias"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 2,
+          "isCorrect": false
+        },
+        {
+          "question": "When learning \"Ancient Cities of Mesopotamia\", what helps best with long-term memory?",
+          "options": [
+            "Active recall and quizzes",
+            "Reading once only",
+            "Skipping revision",
+            "Avoiding questions"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which is the best example of cause-and-effect in history?",
+          "options": [
+            "Random facts with no links",
+            "Event leading to social or political change",
+            "Only names and dates",
+            "Colorful textbook covers"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "How should a student verify a historical claim?",
+          "options": [
+            "Trust one source only",
+            "Check textbook, sources, and evidence",
+            "Use rumors",
+            "Ignore context"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "What is one expected outcome after studying \"Ancient Cities of Mesopotamia\"?",
+          "options": [
+            "Understanding historical context",
+            "Avoiding all discussion",
+            "Memorizing unrelated formulas",
+            "Ignoring chapter terms"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which approach is most appropriate for school-level history learning?",
+          "options": [
+            "Balanced understanding of facts and concepts",
+            "Only difficult research papers",
+            "No examples",
+            "No revision"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        }
+      ],
+      "created_at": "2026-02-13T06:07:12.228Z"
+    },
+    {
+      "id": 4,
+      "user_id": 1,
+      "chapter_name": "Vital Villages, Thriving Towns",
+      "chapter_number": 8,
+      "syllabus": "cbse",
+      "term": null,
+      "score": 4,
+      "total": 10,
+      "questions": [
+        {
+          "question": "What is the main theme of the chapter \"Vital Villages, Thriving Towns\"?",
+          "options": [
+            "Political events",
+            "Historical developments and their impact",
+            "Only geography",
+            "Only economics"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which skill is most important while studying class 6 history chapters?",
+          "options": [
+            "Memorizing without understanding",
+            "Connecting causes and effects",
+            "Ignoring timelines",
+            "Skipping maps"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "In \"Vital Villages, Thriving Towns\", why are timelines useful?",
+          "options": [
+            "They decorate pages",
+            "They show event order clearly",
+            "They replace textbooks",
+            "They are only for exams"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which source is generally considered a primary historical source?",
+          "options": [
+            "A modern blog post",
+            "A recent movie review",
+            "An inscription from that period",
+            "A random social post"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 2,
+          "isCorrect": true
+        },
+        {
+          "question": "A major reason historians compare multiple sources is to:",
+          "options": [
+            "Finish homework quickly",
+            "Avoid all interpretation",
+            "Cross-check reliability",
+            "Ignore bias"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 2,
+          "isCorrect": false
+        },
+        {
+          "question": "When learning \"Vital Villages, Thriving Towns\", what helps best with long-term memory?",
+          "options": [
+            "Active recall and quizzes",
+            "Reading once only",
+            "Skipping revision",
+            "Avoiding questions"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which is the best example of cause-and-effect in history?",
+          "options": [
+            "Random facts with no links",
+            "Event leading to social or political change",
+            "Only names and dates",
+            "Colorful textbook covers"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "How should a student verify a historical claim?",
+          "options": [
+            "Trust one source only",
+            "Check textbook, sources, and evidence",
+            "Use rumors",
+            "Ignore context"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "What is one expected outcome after studying \"Vital Villages, Thriving Towns\"?",
+          "options": [
+            "Understanding historical context",
+            "Avoiding all discussion",
+            "Memorizing unrelated formulas",
+            "Ignoring chapter terms"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which approach is most appropriate for school-level history learning?",
+          "options": [
+            "Balanced understanding of facts and concepts",
+            "Only difficult research papers",
+            "No examples",
+            "No revision"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        }
+      ],
+      "created_at": "2026-02-13T06:18:44.451Z"
+    },
+    {
+      "id": 5,
+      "user_id": 1,
+      "chapter_name": "Ancient Civilisations of Greece and Rome",
+      "chapter_number": 7,
+      "syllabus": "samacheer",
+      "term": "term2",
+      "score": 4,
+      "total": 10,
+      "questions": [
+        {
+          "question": "What is the main theme of the chapter \"Ancient Civilisations of Greece and Rome\"?",
+          "options": [
+            "Political events",
+            "Historical developments and their impact",
+            "Only geography",
+            "Only economics"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which skill is most important while studying class 6 history chapters?",
+          "options": [
+            "Memorizing without understanding",
+            "Connecting causes and effects",
+            "Ignoring timelines",
+            "Skipping maps"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "In \"Ancient Civilisations of Greece and Rome\", why are timelines useful?",
+          "options": [
+            "They decorate pages",
+            "They show event order clearly",
+            "They replace textbooks",
+            "They are only for exams"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which source is generally considered a primary historical source?",
+          "options": [
+            "A modern blog post",
+            "A recent movie review",
+            "An inscription from that period",
+            "A random social post"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 2,
+          "isCorrect": true
+        },
+        {
+          "question": "A major reason historians compare multiple sources is to:",
+          "options": [
+            "Finish homework quickly",
+            "Avoid all interpretation",
+            "Cross-check reliability",
+            "Ignore bias"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 2,
+          "isCorrect": false
+        },
+        {
+          "question": "When learning \"Ancient Civilisations of Greece and Rome\", what helps best with long-term memory?",
+          "options": [
+            "Active recall and quizzes",
+            "Reading once only",
+            "Skipping revision",
+            "Avoiding questions"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which is the best example of cause-and-effect in history?",
+          "options": [
+            "Random facts with no links",
+            "Event leading to social or political change",
+            "Only names and dates",
+            "Colorful textbook covers"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "How should a student verify a historical claim?",
+          "options": [
+            "Trust one source only",
+            "Check textbook, sources, and evidence",
+            "Use rumors",
+            "Ignore context"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "What is one expected outcome after studying \"Ancient Civilisations of Greece and Rome\"?",
+          "options": [
+            "Understanding historical context",
+            "Avoiding all discussion",
+            "Memorizing unrelated formulas",
+            "Ignoring chapter terms"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which approach is most appropriate for school-level history learning?",
+          "options": [
+            "Balanced understanding of facts and concepts",
+            "Only difficult research papers",
+            "No examples",
+            "No revision"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        }
+      ],
+      "created_at": "2026-02-13T06:27:26.026Z"
+    }
+  ],
+  "nextUserId": 2,
+  "nextQuizId": 6
+}

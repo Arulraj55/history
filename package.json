@@ -1,0 +1,16 @@
+{
+  "name": "history-learning-platform",
+  "version": "1.0.0",
+  "description": "Interactive History Learning Platform with Videos and Quizzes",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "node-fetch": "^2.7.0"
+  }
+}
