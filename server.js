@@ -151,7 +151,7 @@ function scoreVideo(video, chapter) {
 
 async function fetchVideoDetails(videoIds) {
   if (!videoIds.length) return [];
-  const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics&id=${videoIds.join(',')}&key=${YOUTUBE_API_KEY}`;
+  const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,status&id=${videoIds.join(',')}&key=${YOUTUBE_API_KEY}`;
   const detailsResp = await fetch(detailsUrl);
   const detailsData = await detailsResp.json();
   if (detailsData.error) {
@@ -167,6 +167,95 @@ function normalizeTitle(title) {
     .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+async function isEmbeddableViaOEmbed(videoId) {
+  try {
+    const url = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+    const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    return response.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function fetchNoKeyVideoMeta(videoId) {
+  try {
+    const url = `https://www.youtube.com/watch?v=${videoId}`;
+    const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const html = await response.text();
+
+    const lenMatch = html.match(/"lengthSeconds":"(\d+)"/);
+    const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
+    const channelMatch = html.match(/"ownerChannelName":"([^"]+)"/);
+
+    const durationSeconds = Number.parseInt(lenMatch?.[1] || '0', 10) || 0;
+    let title = String(titleMatch?.[1] || '').replace(' - YouTube', '').trim();
+    if (!title) title = `Video ${videoId}`;
+
+    return {
+      title,
+      channel: channelMatch?.[1] || 'YouTube',
+      durationSeconds,
+      durationLabel: formatDuration(durationSeconds)
+    };
+  } catch (_) {
+    return {
+      title: `Video ${videoId}`,
+      channel: 'YouTube',
+      durationSeconds: 0,
+      durationLabel: '--:--'
+    };
+  }
+}
+
+async function searchYouTubeFallbackNoKey(query) {
+  try {
+    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    const response = await fetch(searchUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const html = await response.text();
+
+    const ids = [];
+    const seen = new Set();
+    const regex = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
+    let match;
+    while ((match = regex.exec(html)) !== null) {
+      const id = match[1];
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      ids.push(id);
+      if (ids.length >= 20) break;
+    }
+
+    const results = [];
+    for (const id of ids) {
+      if (results.length >= 4) break;
+      const embeddable = await isEmbeddableViaOEmbed(id);
+      if (!embeddable) continue;
+
+      const meta = await fetchNoKeyVideoMeta(id);
+      if (meta.durationSeconds < 120) continue;
+      if (isLikelyIrrelevant({ title: meta.title, description: '' })) continue;
+
+      results.push({
+        videoId: id,
+        title: meta.title,
+        thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+        channel: meta.channel,
+        description: '',
+        durationSeconds: meta.durationSeconds,
+        durationLabel: meta.durationLabel,
+        viewCount: '0',
+        embeddable: true,
+        relevanceScore: 1
+      });
+    }
+
+    return results;
+  } catch (err) {
+    console.error('No-key YouTube fallback failed:', err);
+    return [];
+  }
 }
 
 async function searchYouTube(query, chapter, options = {}) {
@@ -208,7 +297,8 @@ async function searchYouTube(query, chapter, options = {}) {
         description: item.snippet?.description || '',
         durationSeconds,
         durationLabel: formatDuration(durationSeconds),
-        viewCount: item.statistics?.viewCount || '0'
+        viewCount: item.statistics?.viewCount || '0',
+        embeddable: item.status?.embeddable !== false
       };
     });
 
@@ -216,6 +306,7 @@ async function searchYouTube(query, chapter, options = {}) {
     const relaxIrrelevant = Boolean(options.relaxIrrelevant);
 
     const filtered = mapped
+      .filter(v => v.embeddable)
       .filter(v => v.durationSeconds >= minDurationSeconds)
       .filter(v => !isShortsLike(v))
       .filter(v => (relaxIrrelevant ? true : !isLikelyIrrelevant(v)))
@@ -276,6 +367,16 @@ app.get('/api/youtube/search', async (req, res) => {
   await collect(`${topicOrChapter} ${chapter} explained`, { relevanceLanguage: 'en', minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
   await collect(`${chapter} history documentary`, { minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
   await collect(`${chapter} class ${req.query.userClass || ''} history`, { minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
+
+  if (picked.length < 2) {
+    const noKeyResults = await searchYouTubeFallbackNoKey(`${topicOrChapter} ${chapter} history animation`);
+    for (const video of noKeyResults) {
+      if (picked.length >= 2) break;
+      if (seen.has(video.videoId)) continue;
+      seen.add(video.videoId);
+      picked.push({ ...video, sourceTier: 'Fallback' });
+    }
+  }
 
   res.json({ videos: picked.slice(0, 2) });
 });
