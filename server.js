@@ -169,6 +169,80 @@ function normalizeTitle(title) {
     .trim();
 }
 
+const FALLBACK_VIDEO_LIBRARY = [
+  {
+    videoId: 'XBg38lI-MOQ',
+    title: 'The Earliest Cities: Indus Valley Civilisation | History Class 6 | NCERT | CBSE | AASOKA',
+    channel: 'Aasoka',
+    durationSeconds: 920,
+    keywords: ['harappa', 'indus', 'earliest cities', 'vital villages', 'thriving towns', 'class 6']
+  },
+  {
+    videoId: 'KhDY4KJuvc0',
+    title: 'Indus Valley Civilization Facts - History of Ancient India | Educational Videos by Mocomi',
+    channel: 'MocomiKids',
+    durationSeconds: 244,
+    keywords: ['harappa', 'indus', 'ancient india', 'civilisation', 'civilization']
+  },
+  {
+    videoId: 'TLcLQr3oCdQ',
+    title: 'The French Revolution: A Turning Point in History | Animated Historic Story',
+    channel: 'The History Portal',
+    durationSeconds: 738,
+    keywords: ['french revolution', 'revolution', 'class 9', 'modern history']
+  },
+  {
+    videoId: '8qRZcXIODNU',
+    title: 'French Revolution Explained for Students',
+    channel: 'Educational History',
+    durationSeconds: 621,
+    keywords: ['french revolution', 'revolution', 'europe']
+  },
+  {
+    videoId: 'n7ndRwqJYDM',
+    title: 'Industrial Revolution Explained - Animated History',
+    channel: 'FreeSchool',
+    durationSeconds: 527,
+    keywords: ['industrial revolution', 'modern world', 'class 10']
+  },
+  {
+    videoId: 'zVYBq0rVjS0',
+    title: 'Ancient Civilizations for Kids | World History Animation',
+    channel: 'Educational Videos',
+    durationSeconds: 486,
+    keywords: ['civilisation', 'civilization', 'ancient', 'history', 'class 6', 'class 7']
+  }
+];
+
+function pickFromFallbackLibrary(chapter, topic, limit = 2) {
+  const text = `${chapter || ''} ${topic || ''}`.toLowerCase();
+  const scored = FALLBACK_VIDEO_LIBRARY
+    .map(item => {
+      let score = 0;
+      for (const key of item.keywords) {
+        if (text.includes(key)) score += 3;
+      }
+      if (text && item.title.toLowerCase().includes(text.slice(0, 20))) score += 2;
+      return { item, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .map(x => x.item);
+
+  return scored.slice(0, limit).map(item => ({
+    videoId: item.videoId,
+    title: item.title,
+    thumbnail: `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`,
+    channel: item.channel,
+    description: '',
+    durationSeconds: item.durationSeconds,
+    durationLabel: formatDuration(item.durationSeconds),
+    viewCount: '0',
+    embeddable: true,
+    relevanceScore: 1,
+    sourceTier: 'Fallback Library'
+  }));
+}
+
 async function isEmbeddableViaOEmbed(videoId) {
   try {
     const url = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
@@ -375,6 +449,16 @@ app.get('/api/youtube/search', async (req, res) => {
       if (seen.has(video.videoId)) continue;
       seen.add(video.videoId);
       picked.push({ ...video, sourceTier: 'Fallback' });
+    }
+  }
+
+  if (picked.length < 2) {
+    const curated = pickFromFallbackLibrary(chapter, focusTopic, 2);
+    for (const video of curated) {
+      if (picked.length >= 2) break;
+      if (seen.has(video.videoId)) continue;
+      seen.add(video.videoId);
+      picked.push(video);
     }
   }
 
