@@ -578,10 +578,11 @@ async function loadVideos(chapter, options = {}) {
 
     let html = '';
     videos.forEach((v, idx) => {
-      const videoUrl = `https://www.youtube.com/watch?v=${v.videoId}`;
-      const canEmbed = Number(v.durationSeconds || 0) > 0;
-      const videoFrame = canEmbed
-        ? `
+      const durationTag = escapeHtml(v.durationLabel || '--:--');
+
+      html += `
+        <div class="video-card" style="animation-delay:${idx * 0.08}s">
+          <div class="video-embed">
             <iframe 
               src="https://www.youtube.com/embed/${v.videoId}?rel=0" 
               title="${escapeHtml(v.title)}"
@@ -589,38 +590,11 @@ async function loadVideos(chapter, options = {}) {
               loading="lazy"
               allowfullscreen>
             </iframe>
-          `
-        : `
-            <a class="video-fallback-preview" href="${videoUrl}" target="_blank" rel="noopener noreferrer" aria-label="Open video in YouTube">
-              <img src="${escapeHtml(v.thumbnail)}" alt="${escapeHtml(v.title)}" loading="lazy">
-              <span class="video-fallback-overlay"><i class="fab fa-youtube"></i> Open in YouTube</span>
-            </a>
-          `;
-
-      const durationTag = canEmbed
-        ? escapeHtml(v.durationLabel || '--:--')
-        : 'Duration on YouTube';
-      const sourceTag = v.sourceTier === 'Fallback Search' ? 'Suggested' : (v.sourceTier || 'Any Language');
-
-      html += `
-        <div class="video-card" style="animation-delay:${idx * 0.08}s">
-          <div class="video-embed">
-            ${videoFrame}
           </div>
           <div class="video-meta">
             <div class="video-title">${escapeHtml(v.title)}</div>
             <div class="video-tags-row">
               <span class="video-tag"><i class="fas fa-clock"></i> ${durationTag}</span>
-              <span class="video-tag"><i class="fas fa-language"></i> ${escapeHtml(sourceTag)}</span>
-            </div>
-            <div class="video-channel">${escapeHtml(v.channel)}</div>
-            <div class="video-links-row">
-              <a class="video-link-btn" href="${videoUrl}" target="_blank" rel="noopener noreferrer">
-                <i class="fab fa-youtube"></i> Open in YouTube
-              </a>
-              <button class="video-link-btn copy-link-btn" data-link="${videoUrl}" type="button">
-                <i class="fas fa-copy"></i> Copy Link
-              </button>
             </div>
           </div>
         </div>
@@ -628,18 +602,6 @@ async function loadVideos(chapter, options = {}) {
     });
 
     $('#videos-container').innerHTML = html;
-
-    $$('.copy-link-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const link = btn.getAttribute('data-link') || '';
-        try {
-          await copyText(link);
-          showToast('Video link copied', 'success');
-        } catch (err) {
-          showToast('Unable to copy link on this device', 'error');
-        }
-      });
-    });
 
     // Enable quiz after a short delay (simulating watching)
     setTimeout(enableQuizButton, 3000);
