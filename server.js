@@ -17,7 +17,20 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // API Keys
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || 'AIzaSyAVfPNDMuwRKLbqRRTZkcpScvOheClh-vM';
+const YOUTUBE_API_KEY = String(process.env.YOUTUBE_API_KEY || '').trim();
+
+// YouTube resilience and quota controls
+const YOUTUBE_SEARCH_CACHE_TTL_MS = Number(process.env.YOUTUBE_SEARCH_CACHE_TTL_MS || 12 * 60 * 60 * 1000);
+const API_RESPONSE_CACHE_TTL_MS = Number(process.env.API_RESPONSE_CACHE_TTL_MS || 24 * 60 * 60 * 1000);
+const YOUTUBE_DAILY_SEARCH_BUDGET = Number(process.env.YOUTUBE_DAILY_SEARCH_BUDGET || 80);
+
+const youtubeSearchCache = new Map();
+const apiResponseCache = new Map();
+const youtubeUsage = {
+  date: new Date().toISOString().slice(0, 10),
+  searchCalls: 0,
+  disabledUntil: 0
+};
 
 // Middleware
 app.use(cors());
@@ -111,6 +124,23 @@ function isLikelyIrrelevant(video) {
   return blocked.some(token => title.includes(token) || description.includes(token));
 }
 
+function isAnimatedVideo(video) {
+  const title = (video.title || '').toLowerCase();
+  const description = (video.description || '').toLowerCase();
+  const text = `${title} ${description}`;
+  const animationTokens = [
+    'animation',
+    'animated',
+    'animat',
+    'cartoon',
+    '2d',
+    '3d',
+    'motion graphic',
+    'explainer'
+  ];
+  return animationTokens.some(token => text.includes(token));
+}
+
 function scoreVideo(video, chapter) {
   const title = (video.title || '').toLowerCase();
   const description = (video.description || '').toLowerCase();
@@ -169,6 +199,49 @@ function normalizeTitle(title) {
     .trim();
 }
 
+function getCached(map, key) {
+  const hit = map.get(key);
+  if (!hit) return null;
+  if (Date.now() > hit.expiresAt) {
+    map.delete(key);
+    return null;
+  }
+  return hit.value;
+}
+
+function setCached(map, key, value, ttlMs) {
+  map.set(key, {
+    value,
+    expiresAt: Date.now() + Math.max(1000, Number(ttlMs) || 0)
+  });
+}
+
+function refreshUsageDay() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (youtubeUsage.date !== today) {
+    youtubeUsage.date = today;
+    youtubeUsage.searchCalls = 0;
+    youtubeUsage.disabledUntil = 0;
+  }
+}
+
+function canUseYouTubeApi() {
+  refreshUsageDay();
+  if (!YOUTUBE_API_KEY) return false;
+  if (Date.now() < youtubeUsage.disabledUntil) return false;
+  if (youtubeUsage.searchCalls >= YOUTUBE_DAILY_SEARCH_BUDGET) return false;
+  return true;
+}
+
+function markYouTubeSearchCall() {
+  refreshUsageDay();
+  youtubeUsage.searchCalls += 1;
+}
+
+function disableYouTubeTemporarily(minutes = 30) {
+  youtubeUsage.disabledUntil = Date.now() + Math.max(1, minutes) * 60 * 1000;
+}
+
 const FALLBACK_VIDEO_LIBRARY = [
   {
     videoId: 'XBg38lI-MOQ',
@@ -217,6 +290,7 @@ const FALLBACK_VIDEO_LIBRARY = [
 function pickFromFallbackLibrary(chapter, topic, limit = 2) {
   const text = `${chapter || ''} ${topic || ''}`.toLowerCase();
   const scored = FALLBACK_VIDEO_LIBRARY
+    .filter(item => isAnimatedVideo({ title: item.title, description: '' }))
     .map(item => {
       let score = 0;
       for (const key of item.keywords) {
@@ -310,6 +384,7 @@ async function searchYouTubeFallbackNoKey(query) {
       const meta = await fetchNoKeyVideoMeta(id);
       if (meta.durationSeconds < 120) continue;
       if (isLikelyIrrelevant({ title: meta.title, description: '' })) continue;
+      if (!isAnimatedVideo({ title: meta.title, description: '' })) continue;
 
       results.push({
         videoId: id,
@@ -333,12 +408,19 @@ async function searchYouTubeFallbackNoKey(query) {
 }
 
 async function searchYouTube(query, chapter, options = {}) {
-  if (!YOUTUBE_API_KEY) return [];
+  if (!canUseYouTubeApi()) return [];
+
+  const cacheKey = JSON.stringify({ query, chapter, options });
+  const cached = getCached(youtubeSearchCache, cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const params = new URLSearchParams({
     part: 'snippet',
     q: query,
     type: 'video',
-    maxResults: String(options.maxResults || 16),
+    maxResults: String(options.maxResults || 20),
     videoEmbeddable: 'true',
     videoDefinition: 'high',
     order: 'relevance',
@@ -351,10 +433,15 @@ async function searchYouTube(query, chapter, options = {}) {
 
   const url = `https://www.googleapis.com/youtube/v3/search?${params.toString()}`;
   try {
+    markYouTubeSearchCall();
     const response = await fetch(url);
     const data = await response.json();
     if (data.error) {
       console.error('YouTube API error:', data.error);
+      const reason = data.error?.errors?.[0]?.reason || '';
+      if (reason === 'quotaExceeded' || reason === 'dailyLimitExceeded' || reason === 'keyInvalid') {
+        disableYouTubeTemporarily(reason === 'keyInvalid' ? 720 : 60);
+      }
       return [];
     }
 
@@ -382,14 +469,17 @@ async function searchYouTube(query, chapter, options = {}) {
     const filtered = mapped
       .filter(v => v.embeddable)
       .filter(v => v.durationSeconds >= minDurationSeconds)
+      .filter(v => isAnimatedVideo(v))
       .filter(v => !isShortsLike(v))
       .filter(v => (relaxIrrelevant ? true : !isLikelyIrrelevant(v)))
       .map(v => ({ ...v, relevanceScore: scoreVideo(v, chapter) }))
       .sort((a, b) => b.relevanceScore - a.relevanceScore);
 
+    setCached(youtubeSearchCache, cacheKey, filtered, YOUTUBE_SEARCH_CACHE_TTL_MS);
     return filtered;
   } catch (err) {
     console.error('YouTube fetch error:', err);
+    disableYouTubeTemporarily(10);
     return [];
   }
 }
@@ -401,6 +491,18 @@ app.get('/api/youtube/search', async (req, res) => {
   }
   const focusTopic = String(topic || '').trim();
   const topicOrChapter = focusTopic || chapter;
+
+  const responseCacheKey = JSON.stringify({
+    chapter: String(chapter || '').toLowerCase(),
+    topic: focusTopic.toLowerCase(),
+    syllabus: String(syllabus || '').toLowerCase(),
+    userClass: String(req.query.userClass || '').toLowerCase()
+  });
+
+  const cachedResponse = getCached(apiResponseCache, responseCacheKey);
+  if (cachedResponse) {
+    return res.json({ videos: cachedResponse, cached: true });
+  }
 
   const picked = [];
   const seen = new Set();
@@ -426,21 +528,15 @@ app.get('/api/youtube/search', async (req, res) => {
   const normalizedSyllabus = String(syllabus || '').toLowerCase();
   const isSamacheer = normalizedSyllabus === 'samacheer';
 
-  if (isSamacheer) {
-    await collect(`${topicOrChapter} ${chapter} history animation tamil`, { relevanceLanguage: 'ta' }, 'Tamil');
-    await collect(`${topicOrChapter} ${chapter} history animation english`, { relevanceLanguage: 'en' }, 'English');
-  } else {
-    await collect(`${topicOrChapter} ${chapter} history animation english`, { relevanceLanguage: 'en' }, 'English');
-    await collect(`${topicOrChapter} ${chapter} history animation tamil`, { relevanceLanguage: 'ta' }, 'Tamil');
+  // Keep quota use predictable: a single YouTube API search request per endpoint call.
+  const langHint = isSamacheer ? 'tamil english' : 'english tamil';
+  const classHint = String(req.query.userClass || '').trim();
+  const primaryQuery = `${topicOrChapter} ${chapter} history animation lesson ${langHint} class ${classHint}`.trim();
+  await collect(primaryQuery, { minDurationSeconds: 90, maxResults: 20 }, isSamacheer ? 'Tamil+English' : 'English+Tamil');
+
+  if (picked.length < 2) {
+    await collect(`${topicOrChapter} ${chapter} explained history`, { minDurationSeconds: 60, relaxIrrelevant: true, maxResults: 20 }, 'Fallback API');
   }
-
-  await collect(`${topicOrChapter} ${chapter} history animation`, {}, 'Any Language');
-  await collect(`${topicOrChapter} ${chapter} animated history lesson`, {}, 'Any Language');
-
-  // Fallback queries with relaxed filters so users still get playable videos.
-  await collect(`${topicOrChapter} ${chapter} explained`, { relevanceLanguage: 'en', minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
-  await collect(`${chapter} history documentary`, { minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
-  await collect(`${chapter} class ${req.query.userClass || ''} history`, { minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
 
   if (picked.length < 2) {
     const noKeyResults = await searchYouTubeFallbackNoKey(`${topicOrChapter} ${chapter} history animation`);
@@ -462,7 +558,18 @@ app.get('/api/youtube/search', async (req, res) => {
     }
   }
 
-  res.json({ videos: picked.slice(0, 2) });
+  const finalVideos = picked.slice(0, 2);
+  setCached(apiResponseCache, responseCacheKey, finalVideos, API_RESPONSE_CACHE_TTL_MS);
+
+  res.json({
+    videos: finalVideos,
+    meta: {
+      youtubeEnabled: Boolean(YOUTUBE_API_KEY),
+      apiAvailableNow: canUseYouTubeApi(),
+      dailySearchCallsUsed: youtubeUsage.searchCalls,
+      dailySearchBudget: YOUTUBE_DAILY_SEARCH_BUDGET
+    }
+  });
 });
 
 // ==================== LOCAL QUIZ ROUTES ====================

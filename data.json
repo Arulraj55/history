@@ -674,8 +674,141 @@
         }
       ],
       "created_at": "2026-02-13T06:27:26.026Z"
+    },
+    {
+      "id": 6,
+      "user_id": 1,
+      "chapter_name": "The Mauryan Empire",
+      "chapter_number": 8,
+      "syllabus": "samacheer",
+      "term": "term2",
+      "score": 2,
+      "total": 10,
+      "questions": [
+        {
+          "question": "Which statement best describes \"The Mauryan Empire\"?",
+          "options": [
+            "It is unrelated to history",
+            "It explains important historical changes and their impact",
+            "It is only about mathematics",
+            "It focuses only on modern technology"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "For class 6, what is the best way to study \"The Mauryan Empire\"?",
+          "options": [
+            "Memorize one paragraph only",
+            "Understand timeline, causes, and outcomes",
+            "Skip maps and sources",
+            "Read only once before exam"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "Why do historians compare multiple sources for topics like \"The Mauryan Empire\"?",
+          "options": [
+            "To increase confusion",
+            "To avoid evidence",
+            "To cross-check facts and reduce bias",
+            "To memorize dates only"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 2,
+          "isCorrect": false
+        },
+        {
+          "question": "Which is usually a primary source in history?",
+          "options": [
+            "A school rumor",
+            "An inscription from the same period",
+            "A random social media post",
+            "A fictional comic story"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 1,
+          "isCorrect": false
+        },
+        {
+          "question": "What does a timeline help students do in \"The Mauryan Empire\"?",
+          "options": [
+            "Arrange events in sequence",
+            "Avoid understanding changes",
+            "Replace all textbooks",
+            "Ignore cause and effect"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "Which skill is most useful when answering history questions?",
+          "options": [
+            "Connecting events with reasons and results",
+            "Guessing without reading",
+            "Ignoring chapter vocabulary",
+            "Writing unrelated points"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "In school history, \"cause and effect\" means:",
+          "options": [
+            "Events have no relationship",
+            "One event can lead to another change",
+            "Only kings matter",
+            "Only dates matter"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 1,
+          "isCorrect": true
+        },
+        {
+          "question": "Which revision method helps most before a quiz on \"The Mauryan Empire\"?",
+          "options": [
+            "Active recall with short self-tests",
+            "Reading headings only",
+            "Skipping difficult parts",
+            "Studying only the night before"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "What is a good historical explanation?",
+          "options": [
+            "One with evidence and context",
+            "One based on rumors",
+            "One without dates or places",
+            "One that avoids sources"
+          ],
+          "userAnswer": 1,
+          "correctAnswer": 0,
+          "isCorrect": false
+        },
+        {
+          "question": "After learning \"The Mauryan Empire\", a student should be able to:",
+          "options": [
+            "Explain key developments clearly",
+            "Avoid all discussion",
+            "Ignore historical terms",
+            "Confuse causes with effects"
+          ],
+          "userAnswer": 2,
+          "correctAnswer": 0,
+          "isCorrect": false
+        }
+      ],
+      "created_at": "2026-04-07T03:47:07.830Z"
     }
   ],
   "nextUserId": 2,
-  "nextQuizId": 6
+  "nextQuizId": 7
 }
