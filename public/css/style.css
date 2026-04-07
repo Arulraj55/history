@@ -901,6 +901,34 @@ body::before {
   height: 100%;
   border: none;
 }
+.video-fallback-preview {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.video-fallback-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.video-fallback-overlay {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.82);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .video-meta {
   padding: 16px 18px;
