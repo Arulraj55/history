@@ -22,7 +22,10 @@ const YOUTUBE_API_KEY = String(process.env.YOUTUBE_API_KEY || '').trim();
 // YouTube resilience and quota controls
 const YOUTUBE_SEARCH_CACHE_TTL_MS = Number(process.env.YOUTUBE_SEARCH_CACHE_TTL_MS || 12 * 60 * 60 * 1000);
 const API_RESPONSE_CACHE_TTL_MS = Number(process.env.API_RESPONSE_CACHE_TTL_MS || 24 * 60 * 60 * 1000);
-const YOUTUBE_DAILY_SEARCH_BUDGET = Number(process.env.YOUTUBE_DAILY_SEARCH_BUDGET || 80);
+const YOUTUBE_DAILY_SEARCH_BUDGET = Math.max(60, Number(process.env.YOUTUBE_DAILY_SEARCH_BUDGET || 80));
+const MIN_VIDEO_DURATION_SECONDS = Math.max(45, Number(process.env.MIN_VIDEO_DURATION_SECONDS || 60));
+const MAX_VIDEO_DURATION_SECONDS = Math.min(600, Math.max(120, Number(process.env.MAX_VIDEO_DURATION_SECONDS || 600)));
+const SEARCH_RULES_VERSION = 'v2-strict-animated-under-10m';
 
 const youtubeSearchCache = new Map();
 const apiResponseCache = new Map();
@@ -127,18 +130,54 @@ function isLikelyIrrelevant(video) {
 function isAnimatedVideo(video) {
   const title = (video.title || '').toLowerCase();
   const description = (video.description || '').toLowerCase();
+  const channel = (video.channel || '').toLowerCase();
+  const titleText = `${title}`;
   const text = `${title} ${description}`;
-  const animationTokens = [
+  const strongAnimationTokens = [
     'animation',
     'animated',
-    'animat',
     'cartoon',
-    '2d',
-    '3d',
+    '2d animation',
+    '3d animation',
     'motion graphic',
-    'explainer'
+    'animated story'
   ];
-  return animationTokens.some(token => text.includes(token));
+
+  const lectureLikeTokens = [
+    'by teacher',
+    'explanation',
+    'full chapter',
+    'one shot',
+    'revision class',
+    'lecture'
+  ];
+
+  const trustedAnimatedChannels = [
+    'ted-ed',
+    'mocomi',
+    'freeschool',
+    'peekaboo kidz',
+    'simple history',
+    'kurzgesagt',
+    'history illustrated'
+  ];
+
+  const hasStrongAnimationHint = strongAnimationTokens.some(token => titleText.includes(token));
+  const looksLectureLike = lectureLikeTokens.some(token => text.includes(token));
+  const fromTrustedAnimatedChannel = trustedAnimatedChannels.some(token => channel.includes(token));
+  return (hasStrongAnimationHint || fromTrustedAnimatedChannel) && !looksLectureLike;
+}
+
+function passesVideoConstraints(video) {
+  const secs = Number(video.durationSeconds || 0);
+  return (
+    Boolean(video.embeddable !== false) &&
+    secs >= MIN_VIDEO_DURATION_SECONDS &&
+    secs <= MAX_VIDEO_DURATION_SECONDS &&
+    isAnimatedVideo(video) &&
+    !isShortsLike(video) &&
+    !isLikelyIrrelevant(video)
+  );
 }
 
 function scoreVideo(video, chapter) {
@@ -290,7 +329,7 @@ const FALLBACK_VIDEO_LIBRARY = [
 function pickFromFallbackLibrary(chapter, topic, limit = 2) {
   const text = `${chapter || ''} ${topic || ''}`.toLowerCase();
   const scored = FALLBACK_VIDEO_LIBRARY
-    .filter(item => isAnimatedVideo({ title: item.title, description: '' }))
+    .filter(item => passesVideoConstraints({ ...item, description: '', embeddable: true }))
     .map(item => {
       let score = 0;
       for (const key of item.keywords) {
@@ -382,9 +421,7 @@ async function searchYouTubeFallbackNoKey(query) {
       if (!embeddable) continue;
 
       const meta = await fetchNoKeyVideoMeta(id);
-      if (meta.durationSeconds < 120) continue;
-      if (isLikelyIrrelevant({ title: meta.title, description: '' })) continue;
-      if (!isAnimatedVideo({ title: meta.title, description: '' })) continue;
+      if (!passesVideoConstraints({ ...meta, embeddable: true, description: '' })) continue;
 
       results.push({
         videoId: id,
@@ -410,7 +447,7 @@ async function searchYouTubeFallbackNoKey(query) {
 async function searchYouTube(query, chapter, options = {}) {
   if (!canUseYouTubeApi()) return [];
 
-  const cacheKey = JSON.stringify({ query, chapter, options });
+  const cacheKey = JSON.stringify({ query, chapter, options, SEARCH_RULES_VERSION });
   const cached = getCached(youtubeSearchCache, cacheKey);
   if (cached) {
     return cached;
@@ -463,15 +500,12 @@ async function searchYouTube(query, chapter, options = {}) {
       };
     });
 
-    const minDurationSeconds = Number(options.minDurationSeconds || 120);
-    const relaxIrrelevant = Boolean(options.relaxIrrelevant);
-
+    const minDurationSeconds = Math.max(MIN_VIDEO_DURATION_SECONDS, Number(options.minDurationSeconds || MIN_VIDEO_DURATION_SECONDS));
+    const maxDurationSeconds = Math.min(MAX_VIDEO_DURATION_SECONDS, Number(options.maxDurationSeconds || MAX_VIDEO_DURATION_SECONDS));
     const filtered = mapped
-      .filter(v => v.embeddable)
       .filter(v => v.durationSeconds >= minDurationSeconds)
-      .filter(v => isAnimatedVideo(v))
-      .filter(v => !isShortsLike(v))
-      .filter(v => (relaxIrrelevant ? true : !isLikelyIrrelevant(v)))
+      .filter(v => v.durationSeconds <= maxDurationSeconds)
+      .filter(v => passesVideoConstraints(v))
       .map(v => ({ ...v, relevanceScore: scoreVideo(v, chapter) }))
       .sort((a, b) => b.relevanceScore - a.relevanceScore);
 
@@ -493,6 +527,7 @@ app.get('/api/youtube/search', async (req, res) => {
   const topicOrChapter = focusTopic || chapter;
 
   const responseCacheKey = JSON.stringify({
+    rulesVersion: SEARCH_RULES_VERSION,
     chapter: String(chapter || '').toLowerCase(),
     topic: focusTopic.toLowerCase(),
     syllabus: String(syllabus || '').toLowerCase(),
@@ -501,7 +536,10 @@ app.get('/api/youtube/search', async (req, res) => {
 
   const cachedResponse = getCached(apiResponseCache, responseCacheKey);
   if (cachedResponse) {
-    return res.json({ videos: cachedResponse, cached: true });
+    const cachedSafe = (cachedResponse || []).filter(passesVideoConstraints).slice(0, 2);
+    if (cachedSafe.length >= 2) {
+      return res.json({ videos: cachedSafe, cached: true });
+    }
   }
 
   const picked = [];
@@ -532,10 +570,10 @@ app.get('/api/youtube/search', async (req, res) => {
   const langHint = isSamacheer ? 'tamil english' : 'english tamil';
   const classHint = String(req.query.userClass || '').trim();
   const primaryQuery = `${topicOrChapter} ${chapter} history animation lesson ${langHint} class ${classHint}`.trim();
-  await collect(primaryQuery, { minDurationSeconds: 90, maxResults: 20 }, isSamacheer ? 'Tamil+English' : 'English+Tamil');
+  await collect(primaryQuery, { minDurationSeconds: MIN_VIDEO_DURATION_SECONDS, maxDurationSeconds: MAX_VIDEO_DURATION_SECONDS, maxResults: 20 }, isSamacheer ? 'Tamil+English' : 'English+Tamil');
 
   if (picked.length < 2) {
-    await collect(`${topicOrChapter} ${chapter} explained history`, { minDurationSeconds: 60, relaxIrrelevant: true, maxResults: 20 }, 'Fallback API');
+    await collect(`${topicOrChapter} ${chapter} animated history`, { minDurationSeconds: MIN_VIDEO_DURATION_SECONDS, maxDurationSeconds: MAX_VIDEO_DURATION_SECONDS, relaxIrrelevant: true, maxResults: 20 }, 'Fallback API');
   }
 
   if (picked.length < 2) {
@@ -558,7 +596,7 @@ app.get('/api/youtube/search', async (req, res) => {
     }
   }
 
-  const finalVideos = picked.slice(0, 2);
+  const finalVideos = picked.filter(passesVideoConstraints).slice(0, 2);
   setCached(apiResponseCache, responseCacheKey, finalVideos, API_RESPONSE_CACHE_TTL_MS);
 
   res.json({
