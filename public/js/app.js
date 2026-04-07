@@ -4,6 +4,7 @@ const state = {
   currentSyllabus: null,
   currentTerm: null,
   currentChapter: null,
+  currentTopic: null,
   quizQuestions: [],
   userAnswers: [],
   currentQuestion: 0,
@@ -21,6 +22,7 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 function returnToHomeFromResult() {
   state.currentChapter = null;
+  state.currentTopic = null;
   state.quizQuestions = [];
   state.userAnswers = [];
   state.currentQuestion = 0;
@@ -57,6 +59,7 @@ function persistAppState() {
     currentSyllabus: state.currentSyllabus,
     currentTerm: state.currentTerm,
     currentChapter: state.currentChapter,
+    currentTopic: state.currentTopic,
     quizQuestions: state.quizQuestions,
     userAnswers: state.userAnswers,
     currentQuestion: state.currentQuestion,
@@ -75,6 +78,7 @@ function hydrateAppState() {
     state.currentSyllabus = data.currentSyllabus || null;
     state.currentTerm = data.currentTerm || null;
     state.currentChapter = data.currentChapter || null;
+    state.currentTopic = data.currentTopic || null;
     state.quizQuestions = Array.isArray(data.quizQuestions) ? data.quizQuestions : [];
     state.userAnswers = Array.isArray(data.userAnswers) ? data.userAnswers : [];
     state.currentQuestion = Number.isInteger(data.currentQuestion) ? data.currentQuestion : 0;
@@ -107,6 +111,7 @@ function restoreByRoute(route) {
   }
   if (targetRoute === 'samacheer') return loadHome({ section: 'terms', route: 'samacheer', skipHashUpdate: true });
   if (targetRoute === 'chapters') return loadHome({ section: 'chapters', route: 'chapters', skipHashUpdate: true });
+  if (targetRoute === 'topics' && state.currentChapter) return showImportantTopics(state.currentChapter, { route: 'topics', skipHashUpdate: true });
   if (targetRoute === 'videos' && state.currentChapter) return loadVideos(state.currentChapter, { route: 'videos', skipHashUpdate: true });
   if (targetRoute === 'quiz') {
     if (state.quizQuestions.length) {
@@ -370,6 +375,7 @@ function showSyllabusSelection(options = {}) {
   $('#syllabus-selection').classList.remove('hidden');
   $('#term-selection').classList.add('hidden');
   $('#chapter-list').classList.add('hidden');
+  $('#topic-list').classList.add('hidden');
   setRoute('syllabus', { skipHashUpdate: options.skipHashUpdate, replace: options.skipHashUpdate });
 }
 
@@ -379,6 +385,7 @@ function showSyllabusContent(options = {}) {
   if (state.currentSyllabus === 'samacheer') {
     $('#term-selection').classList.remove('hidden');
     $('#chapter-list').classList.add('hidden');
+    $('#topic-list').classList.add('hidden');
     setRoute('samacheer', { skipHashUpdate: options.skipHashUpdate, replace: options.skipHashUpdate });
   } else {
     // CBSE - show chapters directly
@@ -436,7 +443,7 @@ async function loadChapters(options = {}) {
       `;
       card.onclick = () => {
         state.currentChapter = ch;
-        loadVideos(ch);
+        showImportantTopics(ch);
       };
       container.appendChild(card);
     });
@@ -455,6 +462,7 @@ async function loadChapters(options = {}) {
     };
 
     $('#chapter-list').classList.remove('hidden');
+    $('#topic-list').classList.add('hidden');
     if (syllabus === 'samacheer') {
       $('#term-selection').classList.add('hidden');
     } else {
@@ -463,6 +471,61 @@ async function loadChapters(options = {}) {
   } catch (err) {
     showToast(err.message, 'error');
   }
+}
+
+function getImportantTopics(chapterName) {
+  const chapter = String(chapterName || 'This chapter').trim();
+  return [
+    `Story overview of ${chapter}`,
+    `Key people and events in ${chapter}`,
+    `Main causes and turning points in ${chapter}`,
+    `Important dates and timeline of ${chapter}`,
+    `Impact and lessons from ${chapter}`
+  ];
+}
+
+function showImportantTopics(chapter, options = {}) {
+  showPage('home');
+  state.currentChapter = chapter;
+  state.currentTopic = null;
+  setRoute(options.route || 'topics', { skipHashUpdate: options.skipHashUpdate, replace: options.skipHashUpdate });
+
+  $('#syllabus-selection').classList.add('hidden');
+  $('#term-selection').classList.add('hidden');
+  $('#chapter-list').classList.add('hidden');
+  $('#topic-list').classList.remove('hidden');
+
+  $('#topics-title').textContent = `${chapter.name} - Important Story Topics`;
+  const topicsContainer = $('#topics-container');
+  topicsContainer.innerHTML = '';
+
+  const topics = getImportantTopics(chapter.name);
+  topics.forEach((topic, i) => {
+    const card = document.createElement('div');
+    card.className = 'chapter-card';
+    card.style.animationDelay = `${i * 0.04}s`;
+    card.innerHTML = `
+      <div class="chapter-num">${i + 1}</div>
+      <div class="chapter-info">
+        <div class="chapter-name">${escapeHtml(topic)}</div>
+      </div>
+      <div class="chapter-arrow"><i class="fas fa-chevron-right"></i></div>
+    `;
+    card.onclick = () => {
+      state.currentTopic = topic;
+      persistAppState();
+      loadVideos(chapter, { topic });
+    };
+    topicsContainer.appendChild(card);
+  });
+
+  $('#back-to-chapters-from-topics').onclick = () => {
+    state.currentTopic = null;
+    const route = state.currentSyllabus === 'cbse' ? 'cbse' : 'chapters';
+    loadHome({ section: 'chapters', route });
+  };
+
+  persistAppState();
 }
 
 // ==================== VIDEOS ====================
@@ -474,6 +537,11 @@ async function loadVideos(chapter, options = {}) {
   persistAppState();
 
   $('#video-chapter-title').textContent = chapter.name;
+  const topicLabel = options.topic || state.currentTopic;
+  const banner = $('.video-info-banner span');
+  banner.textContent = topicLabel
+    ? `Topic: ${topicLabel}`
+    : 'Watch chapter animation videos to learn before quiz';
   $('#videos-container').innerHTML = `
     <div class="loading-spinner">
       <div class="spinner"></div>
@@ -483,6 +551,10 @@ async function loadVideos(chapter, options = {}) {
 
   // Back button
   $('#back-to-chapters').onclick = () => {
+    if (state.currentChapter) {
+      showImportantTopics(state.currentChapter);
+      return;
+    }
     const route = state.currentSyllabus === 'cbse' ? 'cbse' : 'chapters';
     loadHome({ section: 'chapters', route });
   };
