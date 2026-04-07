@@ -169,6 +169,44 @@ function normalizeTitle(title) {
     .trim();
 }
 
+async function searchYouTubeFallbackNoKey(query, chapter) {
+  try {
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0'
+      }
+    });
+    const html = await response.text();
+    const ids = [];
+    const seen = new Set();
+    const regex = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
+    let match;
+    while ((match = regex.exec(html)) !== null) {
+      const id = match[1];
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      ids.push(id);
+      if (ids.length >= 8) break;
+    }
+
+    return ids.map((videoId, index) => ({
+      videoId,
+      title: `${chapter} - Video ${index + 1}`,
+      thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      channel: 'YouTube',
+      description: '',
+      durationSeconds: 0,
+      durationLabel: '--:--',
+      viewCount: '0',
+      relevanceScore: 1
+    }));
+  } catch (err) {
+    console.error('YouTube no-key fallback failed:', err);
+    return [];
+  }
+}
+
 async function searchYouTube(query, chapter, options = {}) {
   if (!YOUTUBE_API_KEY) return [];
   const params = new URLSearchParams({
@@ -276,6 +314,16 @@ app.get('/api/youtube/search', async (req, res) => {
   await collect(`${topicOrChapter} ${chapter} explained`, { relevanceLanguage: 'en', minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
   await collect(`${chapter} history documentary`, { minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
   await collect(`${chapter} class ${req.query.userClass || ''} history`, { minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
+
+  if (picked.length === 0) {
+    const noKeyFallback = await searchYouTubeFallbackNoKey(`${topicOrChapter} ${chapter} history animation`, chapter);
+    for (const video of noKeyFallback) {
+      if (picked.length >= 2) break;
+      if (seen.has(video.videoId)) continue;
+      seen.add(video.videoId);
+      picked.push({ ...video, sourceTier: 'Fallback Search' });
+    }
+  }
 
   res.json({ videos: picked.slice(0, 2) });
 });
