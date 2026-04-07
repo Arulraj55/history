@@ -560,7 +560,8 @@ async function loadVideos(chapter, options = {}) {
   };
 
   try {
-    const data = await api(`/api/youtube/search?chapter=${encodeURIComponent(chapter.name)}&syllabus=${encodeURIComponent(state.currentSyllabus || '')}`);
+    const topicParam = options.topic || state.currentTopic || '';
+    const data = await api(`/api/youtube/search?chapter=${encodeURIComponent(chapter.name)}&syllabus=${encodeURIComponent(state.currentSyllabus || '')}&topic=${encodeURIComponent(topicParam)}&userClass=${encodeURIComponent(state.user.class || '')}`);
     const videos = data.videos;
 
     if (!videos || videos.length === 0) {

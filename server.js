@@ -212,10 +212,13 @@ async function searchYouTube(query, chapter, options = {}) {
       };
     });
 
+    const minDurationSeconds = Number(options.minDurationSeconds || 120);
+    const relaxIrrelevant = Boolean(options.relaxIrrelevant);
+
     const filtered = mapped
-      .filter(v => v.durationSeconds >= 120)
+      .filter(v => v.durationSeconds >= minDurationSeconds)
       .filter(v => !isShortsLike(v))
-      .filter(v => !isLikelyIrrelevant(v))
+      .filter(v => (relaxIrrelevant ? true : !isLikelyIrrelevant(v)))
       .map(v => ({ ...v, relevanceScore: scoreVideo(v, chapter) }))
       .sort((a, b) => b.relevanceScore - a.relevanceScore);
 
@@ -227,10 +230,12 @@ async function searchYouTube(query, chapter, options = {}) {
 }
 
 app.get('/api/youtube/search', async (req, res) => {
-  const { chapter, syllabus } = req.query;
+  const { chapter, syllabus, topic } = req.query;
   if (!chapter) {
     return res.status(400).json({ error: 'Chapter name is required' });
   }
+  const focusTopic = String(topic || '').trim();
+  const topicOrChapter = focusTopic || chapter;
 
   const picked = [];
   const seen = new Set();
@@ -257,15 +262,20 @@ app.get('/api/youtube/search', async (req, res) => {
   const isSamacheer = normalizedSyllabus === 'samacheer';
 
   if (isSamacheer) {
-    await collect(`${chapter} history animation tamil`, { relevanceLanguage: 'ta' }, 'Tamil');
-    await collect(`${chapter} history animation english`, { relevanceLanguage: 'en' }, 'English');
+    await collect(`${topicOrChapter} ${chapter} history animation tamil`, { relevanceLanguage: 'ta' }, 'Tamil');
+    await collect(`${topicOrChapter} ${chapter} history animation english`, { relevanceLanguage: 'en' }, 'English');
   } else {
-    await collect(`${chapter} history animation english`, { relevanceLanguage: 'en' }, 'English');
-    await collect(`${chapter} history animation tamil`, { relevanceLanguage: 'ta' }, 'Tamil');
+    await collect(`${topicOrChapter} ${chapter} history animation english`, { relevanceLanguage: 'en' }, 'English');
+    await collect(`${topicOrChapter} ${chapter} history animation tamil`, { relevanceLanguage: 'ta' }, 'Tamil');
   }
 
-  await collect(`${chapter} history animation`, {}, 'Any Language');
-  await collect(`${chapter} animated history lesson`, {}, 'Any Language');
+  await collect(`${topicOrChapter} ${chapter} history animation`, {}, 'Any Language');
+  await collect(`${topicOrChapter} ${chapter} animated history lesson`, {}, 'Any Language');
+
+  // Fallback queries with relaxed filters so users still get playable videos.
+  await collect(`${topicOrChapter} ${chapter} explained`, { relevanceLanguage: 'en', minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
+  await collect(`${chapter} history documentary`, { minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
+  await collect(`${chapter} class ${req.query.userClass || ''} history`, { minDurationSeconds: 45, relaxIrrelevant: true, maxResults: 24 }, 'Fallback');
 
   res.json({ videos: picked.slice(0, 2) });
 });
