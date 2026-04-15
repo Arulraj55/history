@@ -1,3 +1,26 @@
+/* Pill-shaped footer upgrade link */
+/* Footer Upgrade Link Styling - compact pill, blue text, bold, no gradient */
+.footer-upgrade-link {
+  display: inline-block;
+  background: transparent;
+  color: #38bdf8;
+  font-weight: 700;
+  padding: 7px 20px;
+  border-radius: 22px;
+  border: 1.5px solid #38bdf8;
+  text-decoration: none;
+  font-size: 0.98rem;
+  box-shadow: none;
+  transition: background 0.16s, color 0.16s, border-color 0.16s, transform 0.1s;
+  margin-top: 10px;
+  letter-spacing: 0.01em;
+}
+.footer-upgrade-link:hover, .footer-upgrade-link:focus {
+  background: rgba(56, 189, 248, 0.08);
+  color: #38bdf8;
+  border-color: #7dd3fc;
+  transform: translateY(-1.5px) scale(1.03);
+}
 /* ==================== CSS VARIABLES ==================== */
 :root {
   --primary: #7C3AED;
@@ -752,25 +775,28 @@ body::before {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 16px 18px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  transition: var(--transition);
-  animation: slideUp 0.4s ease backwards;
-  position: relative;
-  overflow: hidden;
+/* Footer Upgrade Link Styling - pill, border, blue text, bold, no gradient */
+.footer-upgrade-link {
+  display: inline-block;
+  background: transparent;
+  color: #38bdf8;
+  font-weight: 700;
+  padding: 12px 32px;
+  border-radius: 32px;
+  border: 2px solid #38bdf8;
+  text-decoration: none;
+  font-size: 1.08rem;
+  box-shadow: none;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.1s;
+  margin-top: 10px;
+  letter-spacing: 0.01em;
 }
-
-.chapter-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
+.footer-upgrade-link:hover, .footer-upgrade-link:focus {
+  background: rgba(56, 189, 248, 0.08);
+  color: #38bdf8;
+  border-color: #7dd3fc;
+  transform: translateY(-2px) scale(1.04);
+}
   background: linear-gradient(to bottom, var(--primary), var(--secondary));
   opacity: 0;
   transition: var(--transition);
