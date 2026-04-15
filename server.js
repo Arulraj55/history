@@ -40,12 +40,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize database
-initializeDatabase();
+// Initialize database before starting the server
 
 // ==================== AUTH ROUTES ====================
 
-app.post('/api/auth/signup', (req, res) => {
+app.post('/api/auth/signup', async (req, res) => {
   const { username, userClass, password } = req.body;
   if (!username || !userClass || !password) {
     return res.status(400).json({ error: 'All fields are required' });
@@ -53,36 +52,51 @@ app.post('/api/auth/signup', (req, res) => {
   if (password.length < 4) {
     return res.status(400).json({ error: 'Password must be at least 4 characters' });
   }
-  const result = createUser(username.trim(), userClass, password);
-  if (result.success) {
-    res.json({ message: 'Account created successfully', userId: result.userId });
-  } else {
-    res.status(400).json({ error: result.error });
+  try {
+    const result = await createUser(username.trim(), userClass, password);
+    if (result.success) {
+      res.json({ message: 'Account created successfully', userId: result.userId });
+    } else {
+      res.status(400).json({ error: result.error });
+    }
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ error: 'Failed to create account' });
   }
 });
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required' });
   }
-  const result = loginUser(username.trim(), password);
-  if (result.success) {
-    res.json({ user: result.user });
-  } else {
-    res.status(401).json({ error: result.error });
+  try {
+    const result = await loginUser(username.trim(), password);
+    if (result.success) {
+      res.json({ user: result.user });
+    } else {
+      res.status(401).json({ error: result.error });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
   }
 });
 
 // ==================== SYLLABUS ROUTES ====================
 
-app.post('/api/syllabus/set', (req, res) => {
+app.post('/api/syllabus/set', async (req, res) => {
   const { userId, syllabus } = req.body;
   if (!userId || !syllabus) {
     return res.status(400).json({ error: 'User ID and syllabus are required' });
   }
-  updateSyllabus(userId, syllabus);
-  res.json({ message: 'Syllabus updated successfully' });
+  try {
+    await updateSyllabus(userId, syllabus);
+    res.json({ message: 'Syllabus updated successfully' });
+  } catch (error) {
+    console.error('Update syllabus error:', error);
+    res.status(500).json({ error: 'Failed to update syllabus' });
+  }
 });
 
 app.get('/api/chapters/:syllabus/:userClass', (req, res) => {
@@ -760,29 +774,44 @@ app.post('/api/quiz/generate', (req, res) => {
 
 // ==================== QUIZ HISTORY ROUTES ====================
 
-app.post('/api/quiz/save', (req, res) => {
+app.post('/api/quiz/save', async (req, res) => {
   const { userId, chapterName, chapterNumber, syllabus, term, score, total, questions } = req.body;
   if (!userId || !chapterName || score === undefined || !total) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
-  const result = saveQuizResult(userId, chapterName, chapterNumber || 0, syllabus || '', term, score, total, questions || []);
-  res.json(result);
+  try {
+    const result = await saveQuizResult(userId, chapterName, chapterNumber || 0, syllabus || '', term, score, total, questions || []);
+    res.json(result);
+  } catch (error) {
+    console.error('Save quiz result error:', error);
+    res.status(500).json({ error: 'Failed to save quiz result' });
+  }
 });
 
-app.get('/api/quiz/history/:userId', (req, res) => {
+app.get('/api/quiz/history/:userId', async (req, res) => {
   const { userId } = req.params;
-  const history = getQuizHistory(parseInt(userId));
-  res.json({ history });
+  try {
+    const history = await getQuizHistory(parseInt(userId, 10));
+    res.json({ history });
+  } catch (error) {
+    console.error('Get quiz history error:', error);
+    res.status(500).json({ error: 'Failed to get quiz history' });
+  }
 });
 
 // ==================== USER ROUTE ====================
 
-app.get('/api/user/:userId', (req, res) => {
-  const user = getUserById(parseInt(req.params.userId));
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+app.get('/api/user/:userId', async (req, res) => {
+  try {
+    const user = await getUserById(parseInt(req.params.userId, 10));
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ user });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: 'Failed to get user' });
   }
-  res.json({ user });
 });
 
 // Serve SPA
@@ -794,6 +823,16 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🎓 History Learning Platform running at http://localhost:${PORT}\n`);
-});
+async function startServer() {
+  try {
+    await initializeDatabase();
+    app.listen(PORT, () => {
+      console.log(`\n🎓 History Learning Platform running at http://localhost:${PORT}\n`);
+    });
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
