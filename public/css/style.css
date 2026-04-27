@@ -765,8 +765,8 @@ body::before {
 
 /* ==================== CHAPTER CARDS ==================== */
 .chapters-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
@@ -775,31 +775,31 @@ body::before {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
-/* Footer Upgrade Link Styling - pill, border, blue text, bold, no gradient */
-.footer-upgrade-link {
-  display: inline-block;
-  background: transparent;
-  color: #38bdf8;
-  font-weight: 700;
-  padding: 12px 32px;
-  border-radius: 32px;
-  border: 2px solid #38bdf8;
-  text-decoration: none;
-  font-size: 1.08rem;
-  box-shadow: none;
-  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.1s;
-  margin-top: 10px;
-  letter-spacing: 0.01em;
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  animation: slideInUp 0.45s ease backwards;
+  transition: var(--transition);
 }
-.footer-upgrade-link:hover, .footer-upgrade-link:focus {
-  background: rgba(56, 189, 248, 0.08);
-  color: #38bdf8;
-  border-color: #7dd3fc;
-  transform: translateY(-2px) scale(1.04);
-}
-  background: linear-gradient(to bottom, var(--primary), var(--secondary));
+
+.chapter-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(124, 58, 237, 0.12), rgba(6, 182, 212, 0.08));
   opacity: 0;
   transition: var(--transition);
+  pointer-events: none;
+}
+
+.chapter-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .chapter-card:hover {
